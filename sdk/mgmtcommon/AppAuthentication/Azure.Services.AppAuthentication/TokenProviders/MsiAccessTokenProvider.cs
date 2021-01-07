@@ -265,11 +265,24 @@ namespace Microsoft.Azure.Services.AppAuthentication
             {
                 if (exp is AzureServiceTokenProviderException) throw;
 
+                if (exp is AggregateException)
+                {
+                    var aggErrorMessage = "AGGEXPMSG";
+                    foreach (var e in (exp as AggregateException).Flatten().InnerExceptions)
+                    {
+                        if (!string.IsNullOrEmpty(e.Message))
+                            aggErrorMessage += $" {e.Message}";
+                    }
+
+                    throw new AzureServiceTokenProviderException(ConnectionString, resource, authority,
+                             $"SFTEST {AzureServiceTokenProviderException.ManagedServiceIdentityUsed} MsiAggregateException {aggErrorMessage}");
+                }
+
                 var errorMessage = exp.InnerException != null
                     ? $"{exp.Message} {exp.InnerException.Message}"
                     : exp.Message;
                 throw new AzureServiceTokenProviderException(ConnectionString, resource, authority,
-                    $"{AzureServiceTokenProviderException.ManagedServiceIdentityUsed} {AzureServiceTokenProviderException.GenericErrorMessage} {errorMessage}");
+                    $"SFTEST {AzureServiceTokenProviderException.ManagedServiceIdentityUsed} {AzureServiceTokenProviderException.GenericErrorMessage} {errorMessage}");
             }
         }
     }
