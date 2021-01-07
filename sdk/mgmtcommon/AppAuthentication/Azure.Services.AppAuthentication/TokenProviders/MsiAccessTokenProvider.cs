@@ -265,8 +265,11 @@ namespace Microsoft.Azure.Services.AppAuthentication
             {
                 if (exp is AzureServiceTokenProviderException) throw;
 
+                var errorMessage = exp.InnerException != null
+                    ? $"{exp.Message} {exp.InnerException.Message}"
+                    : exp.Message;
                 throw new AzureServiceTokenProviderException(ConnectionString, resource, authority,
-                    $"{AzureServiceTokenProviderException.ManagedServiceIdentityUsed} {AzureServiceTokenProviderException.GenericErrorMessage} {exp.Message}");
+                    $"{AzureServiceTokenProviderException.ManagedServiceIdentityUsed} {AzureServiceTokenProviderException.GenericErrorMessage} {errorMessage}");
             }
         }
     }
